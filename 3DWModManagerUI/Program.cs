@@ -43,7 +43,7 @@ namespace _3DWModManagerUI
 
             List<string> selectedFiles = new List<string>();
             string modsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Ryujinx", "mods", "contents", "010028600EBDA000");
-
+            string modsCachePath = "mods";
 
             ImGuiController controller = null;
             GL gl = null;
@@ -91,14 +91,18 @@ namespace _3DWModManagerUI
 
                 //buttons and stuff here
 
-                /* ImGui.SetCursorPos(new Vector2(window.Size.X/2 - size.X/2, window.Size.Y/2 - size.Y/2)); */
 
+                ImGui.SetCursorPos(UIUtils.CenterCursorWithText(window, "3DW Mod Manager"));
+                UIUtils.TextColoured(new Vector4(1, 0, 0, 1), "3DW Mod Manager");
+
+                
 
                 if (UIUtils.Button("Import Mod"))
                 {
-                    var filePick = Nfd.PickFolder();
+                    var filePick = Nfd.PickFolder("Downloads");
                     if (filePick.Status==NfdStatus.Ok)
                     {
+
                         Console.WriteLine(filePick.Path);
                         selectedFiles.Add(filePick.Path);
 
@@ -110,6 +114,8 @@ namespace _3DWModManagerUI
 
                         FileUtils.CopyDirectory(romfsPath, modsPath+"\\romfs");
                         FileUtils.CopyDirectory(exefsPath, modsPath+"\\exefs");
+                        Directory.CreateDirectory(modsCachePath);
+
                         /* File.Copy(filePick.Path, modsPath+"\\romfs");*/
                     }
                 }
@@ -121,7 +127,6 @@ namespace _3DWModManagerUI
                         File.Delete(file);
                         selectedFiles.Remove(file);
                     }
-
                 }
 
                 if (UIUtils.Button("List Current Mods"))
