@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
 using ImGuiNET;
 using Silk.NET.Windowing;
-using Window = Silk.NET.SDL.Window;
 
 namespace _3DWModManagerUI.Utils
 {
@@ -18,10 +17,10 @@ namespace _3DWModManagerUI.Utils
             return ImGui.Button(label, size);
         }
 
-        public static void TextColoured(Vector4 colour, string text)
+        public static void TextColoured(Colour colour, string text)
         {
             
-            ImGui.TextColored(colour, text);
+            ImGui.TextColored(colour.ToVector4(), text);
         }
     }
 }

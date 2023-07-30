@@ -12,6 +12,7 @@ namespace _3DWModManagerUI.Utils
         public static NfdFilter ImageFiles = new NfdFilter
             { Description = "Image files", Specification = "png,jpg,jpeg,bmp" };
 
-
+        public static NfdFilter ZipFiles = new NfdFilter
+            { Description = "Zip Files", Specification = "zip,7z" };
     }
 }

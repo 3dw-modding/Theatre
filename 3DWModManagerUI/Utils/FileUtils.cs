@@ -21,35 +21,25 @@ namespace _3DWModManagerUI.Utils
             }
         }
 
-        public static string FindFileInDirectory(string directoryPath, string requestedFile)
+        public static void CreateDirectorySafe(string path)
         {
-            if (Path.GetFileNameWithoutExtension(directoryPath).Equals(requestedFile))
+            if (Directory.Exists(path))
+                return;
+            if (File.Exists(path))
             {
-                return directoryPath;
+                File.Delete(path);
+            }
+            Directory.CreateDirectory(path);
+        }
+
+        public static void ReloadDirectory(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path);
             }
 
-            foreach (var file in Directory.EnumerateFiles(directoryPath))
-            {
-                if (file.Equals(requestedFile))
-                {
-                    return file;
-                }
-            }
-
-            foreach (var directory in Directory.EnumerateDirectories(directoryPath))
-            {
-                if (directory.Equals(requestedFile))
-                {
-                    return directory;
-                }
-            }
-
-            foreach (var dir in Directory.EnumerateDirectories(directoryPath))
-            {
-                return FindFileInDirectory(dir, requestedFile);
-            }
-
-            return null;
+            Directory.CreateDirectory(path);
         }
 
         public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive = true)

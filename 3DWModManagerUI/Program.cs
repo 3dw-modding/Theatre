@@ -3,6 +3,7 @@ using System.Net;
 using System.Numerics;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+using _3DWModManagerUI.Handlers;
 using _3DWModManagerUI.Utils;
 using ImGuiNET;
 using NativeFileDialogExtendedSharp;
@@ -15,9 +16,11 @@ namespace _3DWModManagerUI
 {
     public class Program 
     {
+        // TODO: Todo in FrameHandler.cs@37
+        // TODO: Add comments to as much as possible, unless someone does it for me, ill do that next push (maybe probably)
+        // TODO: Switch from Monocraft to the Mario font.
+        // TODO: Make the code a lot more readable
         public static Program Instance { get; private set; }
-
-        private WebClient web = new WebClient();
 
         static void Main(string[] args)
         {
@@ -42,8 +45,6 @@ namespace _3DWModManagerUI
             using var window = Window.Create(WindowOptions.Default);
 
             List<string> selectedFiles = new List<string>();
-            string modsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Ryujinx", "mods", "contents", "010028600EBDA000");
-            string modsCachePath = "mods";
 
             ImGuiController controller = null;
             GL gl = null;
@@ -54,9 +55,10 @@ namespace _3DWModManagerUI
             {
                 static void SetupFonts()
                 {
-                    var fontPath = "_3DWModManagerUI.Fonts.Monocraft.ttf";
+                    var minecraftFontPath = "_3DWModManagerUI.Fonts.Monocraft.ttf";
+                    var fontPath = "C:\\Users\\salma\\source\\repos\\.ModManager\\3dw-Mod-Manager\\3DWModManagerUI\\Fonts\\Mariosans.ttf";
                     
-                    GCHandle pinnedArray = GCHandle.Alloc(Utils.FileUtils.ExtractResource(fontPath), GCHandleType.Pinned);
+                    GCHandle pinnedArray = GCHandle.Alloc(Utils.FileUtils.ExtractResource(minecraftFontPath), GCHandleType.Pinned);
                     IntPtr pointer = pinnedArray.AddrOfPinnedObject();
                     ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, 18, 32);
                     pinnedArray.Free();
@@ -80,6 +82,7 @@ namespace _3DWModManagerUI
             
             window.Render += delta =>
             {
+                
                 controller.Update((float)delta);
                 
                 gl.ClearColor(.45f, .55f, .60f, 1f);
@@ -89,54 +92,9 @@ namespace _3DWModManagerUI
                 ImGui.SetNextWindowSize(new Vector2(window.Size.X, window.Size.Y));
                 ImGui.Begin("MainWindow", ImGuiWindowFlags.NoDecoration);
 
-                //buttons and stuff here
-
-
-                ImGui.SetCursorPos(UIUtils.CenterCursorWithText(window, "3DW Mod Manager"));
-                UIUtils.TextColoured(new Vector4(1, 0, 0, 1), "3DW Mod Manager");
-
-                
-
-                if (UIUtils.Button("Import Mod"))
-                {
-                    var filePick = Nfd.PickFolder("Downloads");
-                    if (filePick.Status==NfdStatus.Ok)
-                    {
-
-                        Console.WriteLine(filePick.Path);
-                        selectedFiles.Add(filePick.Path);
-
-                        string romfsPath = Directory.GetDirectories(filePick.Path, "romfs", SearchOption.AllDirectories)[0];
-                        string exefsPath = Directory.GetDirectories(filePick.Path, "exefs", SearchOption.AllDirectories)[0];
-                        // romfsPath = ;
-
-                        /* Directory.CreateDirectory("files"); */
-
-                        FileUtils.CopyDirectory(romfsPath, modsPath+"\\romfs");
-                        FileUtils.CopyDirectory(exefsPath, modsPath+"\\exefs");
-                        Directory.CreateDirectory(modsCachePath);
-
-                        /* File.Copy(filePick.Path, modsPath+"\\romfs");*/
-                    }
-                }
-
-                if (UIUtils.Button("Clear Files"))
-                {
-                    foreach (var file in Directory.EnumerateFiles(modsPath))
-                    {
-                        File.Delete(file);
-                        selectedFiles.Remove(file);
-                    }
-                }
-
-                if (UIUtils.Button("List Current Mods"))
-                {
-                    foreach (var file in selectedFiles)
-                    {
-                        Console.WriteLine(Path.GetFileName(file));
-                    }
-                }
-
+                FrameHandler.RunFrame(window, ref selectedFiles, 
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Ryujinx", "mods", "contents", "010028600EBDA000"),
+                    "mods");
 
 
                 ImGui.End();
