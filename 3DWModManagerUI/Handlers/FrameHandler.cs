@@ -33,17 +33,12 @@ namespace _3DWModManagerUI.Handlers
 
                     Console.WriteLine(filePick.Path);
                     selectedFiles.Add(filePick.Path);
+                    Directory.CreateDirectory(tempPath);
 
-                    // TODO: Actually make this fucking work properly, because why the hell would you be able to get files in a zip without it being a pain in the ass.
+
                     ZipArchive zip = ZipFile.Open(filePick.Path, ZipArchiveMode.Update);
-                    foreach (var entry in zip.Entries)
-                    {
-                        if (entry.FullName.Equals(string.Empty))
-                        {
-                            continue;
-                        }
-                        entry.ExtractToFile(tempPath, true);
-                    }
+                    zip.ExtractToDirectory(tempPath);
+                    zip.Dispose();
 
                     foreach (var file in Directory.EnumerateFiles(tempPath))
                     {

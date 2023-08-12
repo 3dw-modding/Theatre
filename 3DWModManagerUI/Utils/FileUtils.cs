@@ -6,19 +6,17 @@ using System.Threading.Tasks;
 
 namespace _3DWModManagerUI.Utils
 {
-    public class FileUtils
+    public static class FileUtils
     {
-        public static byte[] ExtractResource(String filename)
+        public static byte[] ExtractResource(string filename)
         {
             System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
-            using (Stream resFilestream = a.GetManifestResourceStream(filename))
-            {
-                string[] names = a.GetManifestResourceNames();
-                if (resFilestream == null) return null;
-                byte[] ba = new byte[resFilestream.Length];
-                resFilestream.Read(ba, 0, ba.Length);
-                return ba;
-            }
+            using Stream? resFilestream = a.GetManifestResourceStream(filename);
+            string[] names = a.GetManifestResourceNames();
+            if (resFilestream == null) return Array.Empty<byte>();
+            byte[] ba = new byte[resFilestream.Length];
+            resFilestream.Read(ba, 0, ba.Length);
+            return ba;
         }
 
         public static void CreateDirectorySafe(string path)
