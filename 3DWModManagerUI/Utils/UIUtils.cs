@@ -4,7 +4,7 @@ using Silk.NET.Windowing;
 
 namespace _3DWModManagerUI.Utils
 {
-    internal class UIUtils
+    internal static class UIUtils
     {
         public static Vector2 CenterCursorWithText(IWindow window, string text)
         {

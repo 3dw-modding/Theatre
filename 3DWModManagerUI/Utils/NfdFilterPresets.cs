@@ -7,12 +7,12 @@ using NativeFileDialogExtendedSharp;
 
 namespace _3DWModManagerUI.Utils
 {
-    public class NfdFilterPresets
+    public static class NfdFilterPresets
     {
-        public static NfdFilter ImageFiles = new NfdFilter
-            { Description = "Image files", Specification = "png,jpg,jpeg,bmp" };
+        public readonly static NfdFilter ImageFiles = new() 
+        { Description = "Image files", Specification = "png,jpg,jpeg,bmp" };
 
-        public static NfdFilter ZipFiles = new NfdFilter
-            { Description = "Zip Files", Specification = "zip,7z" };
+        public readonly static NfdFilter ZipFiles = new() 
+        { Description = "Zip Files", Specification = "zip,7z" };
     }
 }
