@@ -22,6 +22,7 @@
     <PackageReference Include="ImGui.NET" Version="1.88.0" />
     <PackageReference Include="NativeFileDialogExtendedSharp" Version="0.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SharpCompress" Version="0.33.0" />
     <PackageReference Include="Silk.NET.Input" Version="2.17.1" />
     <PackageReference Include="Silk.NET.OpenGL" Version="2.17.1" />
     <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.17.1" />
