@@ -1,12 +1,10 @@
 ﻿using System.Numerics;
-using System.Runtime.InteropServices;
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using Theatre.Handlers;
-using Theatre.Utils;
 
 namespace Theatre
 {
@@ -29,15 +27,9 @@ namespace Theatre
             {
                 static void SetupFonts()
                 {
-                    var minecraftFontPath = "Theatre.Fonts.Monocraft.ttf";
                     var fontPath = "Fonts\\Mariosans.ttf";
-
-                    //GCHandle pinnedArray = GCHandle.Alloc(FileUtils.ExtractResource(fontPath), GCHandleType.Pinned);
-                    //IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-                    //ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, 18, 32);
+                    
                     ImGui.GetIO().Fonts.AddFontFromFileTTF(fontPath, 32);
-
-                    //pinnedArray.Free();
                 }
 
                 gl = window.CreateOpenGL();

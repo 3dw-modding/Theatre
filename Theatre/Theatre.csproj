@@ -10,14 +10,12 @@
 
   <ItemGroup>
     <None Remove="Fonts\Mariosans.ttf" />
-    <None Remove="Fonts\Monocraft.ttf" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Fonts\Mariosans.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Fonts\Monocraft.ttf" />
   </ItemGroup>
 
   <ItemGroup>
