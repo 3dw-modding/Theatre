@@ -10,21 +10,11 @@ using Theatre.Utils;
 
 namespace Theatre
 {
-    // TODO: THIS IS A DEV PUSH, DO NOT USE THIS, ITS REALLY FUCKING BAD, IT DOESNT EVEN WORK, THIS IS ONLY FOR LORD TO HELP FIX MY PROBLEMS
-
     // TODO: Add comments to as much as possible, unless someone does it for me, ill do that next push (maybe probably)
-    // TODO: Make the code a lot more readable
 
     public static class Program 
     {
         static void Main()
-        {
-            // Why the everliving fuck is this here??? like why the fuck are we not just putting the contents of Run into Main????
-            // WHO THE FUCK DID THIS!!!!
-            Run();
-        }
-
-        private static void Run()
         {
             using var window = Window.Create(WindowOptions.Default);
 
@@ -65,11 +55,11 @@ namespace Theatre
             {
                 gl?.Viewport(s);
             };
-            
+
             window.Render += delta =>
             {
                 controller?.Update((float)delta);
-                
+
                 gl?.ClearColor(.45f, .55f, .60f, 1f);
                 gl?.Clear((uint)ClearBufferMask.ColorBufferBit);
 
@@ -77,7 +67,7 @@ namespace Theatre
                 ImGui.SetNextWindowSize(new Vector2(window.Size.X, window.Size.Y));
                 ImGui.Begin("MainWindow", ImGuiWindowFlags.NoDecoration);
 
-                FrameHandler.RunFrame(window, ref selectedFiles, 
+                FrameHandler.RunFrame(window, ref selectedFiles,
                     Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Ryujinx", "mods", "contents", "010028600EBDA000"),
                     "mods");
 
@@ -87,14 +77,14 @@ namespace Theatre
                 controller?.Render();
 
             };
-            
+
             window.Closing += () =>
             {
                 controller?.Dispose();
                 inputContext?.Dispose();
                 gl?.Dispose();
             };
-            
+
             window.Run();
 
             window.Dispose();
