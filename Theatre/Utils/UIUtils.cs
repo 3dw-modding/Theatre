@@ -2,7 +2,7 @@
 using ImGuiNET;
 using Silk.NET.Windowing;
 
-namespace _3DWModManagerUI.Utils
+namespace Theatre.Utils
 {
     internal static class UIUtils
     {
@@ -19,7 +19,6 @@ namespace _3DWModManagerUI.Utils
 
         public static void TextColoured(Colour colour, string text)
         {
-            
             ImGui.TextColored(colour.ToVector4(), text);
         }
     }

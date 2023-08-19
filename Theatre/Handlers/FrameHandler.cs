@@ -1,25 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Compression;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using _3DWModManagerUI.Utils;
+﻿using System.IO.Compression;
 using ImGuiNET;
-using Microsoft.Win32.SafeHandles;
 using NativeFileDialogExtendedSharp;
-using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using Theatre.Utils;
 
-namespace _3DWModManagerUI.Handlers
+namespace Theatre.Handlers
 {
     internal class FrameHandler
     {
         public static void RunFrame(IWindow window, ref List<string> selectedFiles, string ryuModsPath, string cacheModsPath)
         {
             ImGui.SetCursorPos(UIUtils.CenterCursorWithText(window, "3DW Mod Manager"));
-            UIUtils.TextColoured(new Colour(1, 0, 0, 1), "3DW Mod Manager");
+            UIUtils.TextColoured(new Colour(1, 0, 0), "3DW Mod Manager");
+
+            ImGui.GetFont().FontSize *= 1.3f;
+            ImGui.SetCursorPos(UIUtils.CenterCursorWithText(window, "Theatre"));
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY()+ 25);
+            UIUtils.TextColoured(new Colour(0, 0, 1), "Theatre");
+            ImGui.GetFont().FontSize /= 1.3f;
+            
 
             var tempPath = Path.GetTempPath() + "ModManagerUI";
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace _3DWModManagerUI.Utils
+﻿namespace Theatre.Utils
 {
     public static class FileUtils
     {
@@ -69,7 +63,7 @@ namespace _3DWModManagerUI.Utils
                 foreach (DirectoryInfo subDir in dirs)
                 {
                     string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-                    CopyDirectory(subDir.FullName, newDestinationDir, true);
+                    CopyDirectory(subDir.FullName, newDestinationDir);
                 }
             }
         }
