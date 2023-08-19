@@ -1,8 +1,10 @@
-﻿using System.IO.Compression;
-using ImGuiNET;
+﻿using ImGuiNET;
 using NativeFileDialogExtendedSharp;
 using Silk.NET.Windowing;
 using Theatre.Utils;
+using SharpCompress.Readers;
+using SharpCompress.Archives.SevenZip;
+using SharpCompress.Archives;
 
 namespace Theatre.Handlers
 {
@@ -31,11 +33,35 @@ namespace Theatre.Handlers
                     Console.WriteLine(filePick.Path);
                     selectedFiles.Add(filePick.Path);
                     Directory.CreateDirectory(tempPath);
+                    FileInfo info = new(filePick.Path);
 
 
-                    ZipArchive zip = ZipFile.Open(filePick.Path, ZipArchiveMode.Update);
-                    zip.ExtractToDirectory(tempPath);
-                    zip.Dispose();
+                    using (var stream = info.OpenRead())
+                    {
+                        // Zip and Rar get handled by ReaderFactory, but 7z isn't.
+                        if (info.Extension != ".7z")
+                        {
+                            using var reader = ReaderFactory.Open(stream);
+                            reader.WriteAllToDirectory(tempPath, new()
+                            {
+                                ExtractFullPath = true,
+                                Overwrite = true,
+                                PreserveFileTime = true,
+                                PreserveAttributes = true
+                            });
+                        }
+                        else
+                        {
+                            using var reader = SevenZipArchive.Open(stream);
+                            reader.WriteToDirectory(tempPath, new()
+                            {
+                                ExtractFullPath = true,
+                                Overwrite = true,
+                                PreserveAttributes = true,
+                                PreserveFileTime = true
+                            });
+                        }
+                    }
 
                     foreach (var file in Directory.EnumerateFiles(tempPath))
                     {
