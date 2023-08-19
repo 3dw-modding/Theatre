@@ -13,7 +13,7 @@ namespace Theatre.Utils
 
         public static Vector2 CenterCursorWithText(IWindow window, string text)
         {
-            return new Vector2((float)window.Size.X / 2 - ImGui.CalcTextSize(text).X / 2, 0);
+            return new Vector2((float)window.Size.X / 2 - ImGui.CalcTextSize(text).X / 2, ImGui.GetCursorPosY());
         }
 
         public static bool Button(string label)
@@ -22,9 +22,10 @@ namespace Theatre.Utils
             return ImGui.Button(label, size);
         }
 
-        public static void TextColoured(Colour colour, string text)
+        public static void TextColoured(IWindow window, Colour colour, string text, bool centered = true)
         {
-
+            if (centered)
+                ImGui.SetCursorPos(CenterCursorWithText(window, text));
             ImGui.TextColored(colour.ToVector4(), text);
         }
     }

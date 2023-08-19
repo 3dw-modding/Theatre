@@ -25,17 +25,11 @@ namespace Theatre
 
             window.Load += () =>
             {
-                static void SetupFonts()
-                {
-                    var fontPath = "Fonts\\Mariosans.ttf";
-                    
-                    ImGui.GetIO().Fonts.AddFontFromFileTTF(fontPath, 32);
-                }
-
                 gl = window.CreateOpenGL();
                 inputContext = window.CreateInput();
 
-                controller = new ImGuiController(gl, window, inputContext, SetupFonts);
+                controller = new ImGuiController(gl, window, inputContext,
+                    () => ImGui.GetIO().Fonts.AddFontFromFileTTF("Fonts\\Mariosans.ttf", 32));
 
                 selectedFiles = new List<string>();
 

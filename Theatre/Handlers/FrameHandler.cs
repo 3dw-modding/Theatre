@@ -10,14 +10,12 @@ namespace Theatre.Handlers
     {
         public static void RunFrame(IWindow window, ref List<string> selectedFiles, string ryuModsPath, string cacheModsPath)
         {
-            ImGui.SetCursorPos(UIUtils.CenterCursorWithText(window, "3DW Mod Manager"));
-            UIUtils.TextColoured(new Colour(1, 0, 0), "3DW Mod Manager");
+            UIUtils.TextColoured(window, new Colour(1, 0, 0), "3DW Mod Manager");
 
-            ImGui.GetFont().FontSize *= 1.3f;
-            ImGui.SetCursorPos(UIUtils.CenterCursorWithText(window, "Theatre"));
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY()+ 25);
-            UIUtils.TextColoured(new Colour(0, 0, 1), "Theatre");
-            ImGui.GetFont().FontSize /= 1.3f;
+            ImGui.GetFont().FontSize *= 1.4f;
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() * 1.05f);
+            UIUtils.TextColoured(window, new Colour(0, 0, 1), "Theatre");
+            ImGui.GetFont().FontSize /= 1.4f;
             
 
             var tempPath = Path.GetTempPath() + "ModManagerUI";
@@ -48,8 +46,6 @@ namespace Theatre.Handlers
                             return;
                         }
                     }
-
-                    
 
                     string romfsPath = Directory.GetDirectories(filePick.Path, "romfs", SearchOption.AllDirectories)[0];
                     string exefsPath = Directory.GetDirectories(filePick.Path, "exefs", SearchOption.AllDirectories)[0];

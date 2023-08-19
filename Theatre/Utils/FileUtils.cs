@@ -2,19 +2,6 @@
 {
     public static class FileUtils
     {
-
-        [Obsolete("Unused, for removal", true)]
-        public static byte[] ExtractResource(string filename)
-        {
-            System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
-            using Stream? resFilestream = a.GetManifestResourceStream(filename);
-            string[] names = a.GetManifestResourceNames();
-            if (resFilestream == null) return Array.Empty<byte>();
-            byte[] ba = new byte[resFilestream.Length];
-            resFilestream.Read(ba, 0, ba.Length);
-            return ba;
-        }
-
         public static void CreateDirectorySafe(string path)
         {
             if (Directory.Exists(path))
