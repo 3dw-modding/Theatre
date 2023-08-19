@@ -14,9 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Fonts\Mariosans.ttf">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
+    <EmbeddedResource Include="Fonts\Mariosans.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Fonts\Monocraft.ttf" />
   </ItemGroup>
 

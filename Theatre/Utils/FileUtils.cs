@@ -2,6 +2,8 @@
 {
     public static class FileUtils
     {
+
+        [Obsolete("Unused, for removal", true)]
         public static byte[] ExtractResource(string filename)
         {
             System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
