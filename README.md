@@ -1,2 +1,2 @@
-# 3dw-Mod-Manager
-A mod manager for 3dw
+# Theatre
+A mod manager for Super Mario 3D World
