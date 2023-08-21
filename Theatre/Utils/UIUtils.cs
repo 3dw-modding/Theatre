@@ -18,7 +18,7 @@ namespace Theatre.Utils
 
         public static bool Button(string label)
         {
-            Vector2 size = UIUtils.CalcTextSize(label) + ImGui.GetStyle().FramePadding * 2.2f;
+            Vector2 size = CalcTextSize(label);
             return ImGui.Button(label, size);
         }
 

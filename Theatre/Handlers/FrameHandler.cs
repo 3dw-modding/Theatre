@@ -18,10 +18,12 @@ namespace Theatre.Handlers
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() * 1.05f);
             UIUtils.TextColoured(window, new Colour(0, 0, 1), "Theatre");
             ImGui.GetFont().FontSize /= 1.4f;
-            
+
+            ImGui.GetStyle().FrameRounding = 12f;
 
             var tempPath = Path.GetTempPath() + "ModManagerUI";
 
+            ImGui.ShowDemoWindow();
 
 
             if (UIUtils.Button("Import Mod"))

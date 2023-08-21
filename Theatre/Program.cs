@@ -29,7 +29,10 @@ namespace Theatre
                 inputContext = window.CreateInput();
 
                 controller = new ImGuiController(gl, window, inputContext,
-                    () => ImGui.GetIO().Fonts.AddFontFromFileTTF("Fonts\\Mariosans.ttf", 32));
+                    () =>
+                    {
+                        ImGui.GetIO().Fonts.AddFontFromFileTTF("Fonts\\Mariosans.ttf", 32);
+                    });
 
                 selectedFiles = new List<string>();
 

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Theatre.Utils;
 
@@ -91,21 +92,21 @@ public static class GBUtils
         }
         return (name, files.ToArray());
     }
-    public static Dictionary<ulong, (string, AFile[])> GetAllSubmissons(GBGame game, ulong page = 1)
+    public static Dictionary<ulong, (string, AFile[])> GetAllSubmissions(GBGame game, ulong page = 1)
     {
         return GetSubmissions(game, page).Select(x => (x, GetSubmissionData(x)))
             .ToDictionary(x => x.x, x => x.Item2);
     }
-    public static Dictionary<ulong, (string, AFile[])> GetEverySingleSubmisson(GBGame game)
+    public static Dictionary<ulong, (string, AFile[])> GetEverySingleSubmission(GBGame game)
     {
         Dictionary<ulong, (string, AFile[])> result = new();
         ulong page = 1;
-        var subs = GetAllSubmissons(game, page++);
+        var subs = GetAllSubmissions(game, page++);
         while (subs.Count != 0)
         {
             foreach (var (key, value) in subs)
                 result.TryAdd(key, value);
-            subs = GetAllSubmissons(game, page++);
+            subs = GetAllSubmissions(game, page++);
         }
         return result;
     }
