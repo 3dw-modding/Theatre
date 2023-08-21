@@ -127,5 +127,16 @@ namespace Theatre.Utils
             }
             return result;
         }
+        public static void FromBytes(ref Dictionary<ulong, (string, AFile[])> dict, byte[] data)
+        {
+            dict = FromBytes(data);
+        }
+        public static void UpdateEntries(this Dictionary<ulong, (string, AFile[])> dict, GBGame game)
+        {
+            var submissons = GBUtils.GetSubmissions(game);
+            submissons.Where(x => !dict.ContainsKey(x)).
+                Select(x => (x, GBUtils.GetSubmissionData(x)))
+                .ForEach(tup => dict[tup.x] = tup.Item2);
+        }
     }
 }
