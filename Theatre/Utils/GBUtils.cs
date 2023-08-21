@@ -51,8 +51,10 @@ public sealed class AFile
     }
 }
 
+[Obsolete("For removal, moving to a separate private project for this.")]
 public static class GBUtils
 {
+    [Obsolete("For removal, moving to a separate private project for this.")]
     public static ulong[] GetSubmissions(GBGame game, ulong page = 1)
     {
         List<ulong> items = new();
@@ -69,6 +71,8 @@ public static class GBUtils
         }
         return items.ToArray();
     }
+
+    [Obsolete("For removal, moving to a separate private project for this.")]
     public static (string, AFile[]) GetSubmissionData(ulong id)
     {
         List<AFile> files = new();
@@ -92,11 +96,15 @@ public static class GBUtils
         }
         return (name, files.ToArray());
     }
+
+    [Obsolete("For removal, moving to a separate private project for this.")]
     public static Dictionary<ulong, (string, AFile[])> GetAllSubmissions(GBGame game, ulong page = 1)
     {
         return GetSubmissions(game, page).Select(x => (x, GetSubmissionData(x)))
             .ToDictionary(x => x.x, x => x.Item2);
     }
+
+    [Obsolete("For removal, moving to a separate private project for this.")]
     public static Dictionary<ulong, (string, AFile[])> GetEverySingleSubmission(GBGame game)
     {
         Dictionary<ulong, (string, AFile[])> result = new();
@@ -110,4 +118,10 @@ public static class GBUtils
         }
         return result;
     }
+}
+
+public static class CachedGBMods
+{
+    public static Dictionary<ulong, (string, AFile[])> AllWiiUModsCached = new();
+    public static Dictionary<ulong, (string, AFile[])> AllSwitchModsCached = new();
 }

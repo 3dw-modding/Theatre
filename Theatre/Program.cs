@@ -1,10 +1,12 @@
-﻿using System.Numerics;
+﻿using System.Net;
+using System.Numerics;
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using Theatre.Handlers;
+using Theatre.Utils;
 
 namespace Theatre
 {
@@ -14,6 +16,34 @@ namespace Theatre
     {
         static void Main()
         {
+            string cacheDirectory = Path.Join("C:", "Theatre", "cache");
+            string databaseFolderUrl = "https://github.com/Scyye/Theatre/raw/main/Databases/";
+
+            Directory.CreateDirectory(cacheDirectory);
+
+            WebClient client = new WebClient();
+
+
+            if (!File.Exists(Path.Join(cacheDirectory, "switch.bin")))
+                client.DownloadFile(databaseFolderUrl+"switch.bin", Path.Join(cacheDirectory, "switch.bin"));
+
+
+            if (!File.Exists(Path.Join(cacheDirectory, "wiiu.bin")))
+                client.DownloadFile(databaseFolderUrl+"wiiu.bin", Path.Join(cacheDirectory, "wiiu.bin"));
+
+
+            CachedGBMods.AllWiiUModsCached = FileUtils.FromBytes(File.ReadAllBytes(Path.Join(cacheDirectory, "wiiu.bin")));
+            CachedGBMods.AllSwitchModsCached = FileUtils.FromBytes(File.ReadAllBytes(Path.Join(cacheDirectory, "switch.bin")));
+
+            /*
+            foreach (var tuple in CachedGBMods.AllSwitchModsCached)
+                Console.WriteLine("Switch:  " + tuple.Value.Item1);
+
+            foreach (var tuple in CachedGBMods.AllWiiUModsCached)
+                Console.WriteLine("WiiU:  " + tuple.Value.Item1);
+            */
+
+
             using var window = Window.Create(WindowOptions.Default);
 
             List<string> selectedFiles = new();
