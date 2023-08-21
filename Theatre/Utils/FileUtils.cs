@@ -1,10 +1,9 @@
-﻿using ImGuiNET;
+﻿using System.IO.Compression;
 using SharpCompress;
-using SharpCompress.Archives.Rar;
-using SharpCompress.Archives.SevenZip;
-using System.IO.Compression;
 using System.Text;
+using SharpCompress.Archives.Rar;
 using SharpCompress.Archives;
+using SharpCompress.Archives.SevenZip;
 
 namespace Theatre.Utils
 {
@@ -70,86 +69,16 @@ namespace Theatre.Utils
                 }
             }
         }
-
-        public static void Download(string url, string path)
-        {
-            using var client = new HttpClient();
-            var data = client.GetByteArrayAsync(url).GetAwaiter().GetResult();
-
-            File.WriteAllBytes(path, data);
-        }
-
-        public static bool TryImportMod(string file, string ryuModsPath)
-        {
-            string tempPath = Path.GetTempPath() + "TheatreUI";
-
-            Console.WriteLine(file);
-            Directory.CreateDirectory(tempPath);
-
-            using (var stream = File.OpenRead(file))
-            {
-                if (Path.GetExtension(file) == ".rar")
-                {
-                    using var reader = RarArchive.Open(stream);
-                    foreach (var entry in reader.Entries.Where(x => !x.IsDirectory))
-                    {
-                        FileInfo f = new(tempPath + "\\" + entry.Key);
-                        f.Directory?.Create();
-                        using var estream = entry.OpenEntryStream();
-                        using var fstream = f.Create();
-                        estream.CopyTo(fstream);
-                    }
-                }
-                else if (Path.GetExtension(file) == ".7z")
-                {
-                    using var reader = SevenZipArchive.Open(stream);
-                    reader.WriteToDirectory(tempPath, new()
-                    {
-                        ExtractFullPath = true,
-                        Overwrite = true,
-                        PreserveAttributes = true,
-                        PreserveFileTime = true
-                    });
-                }
-                else if (Path.GetExtension(file) == ".zip")
-                {
-                    using var reader = new ZipArchive(stream, ZipArchiveMode.Read);
-                    reader.ExtractToDirectory(tempPath, true);
-                }
-            }
-
-            foreach (var f in Directory.EnumerateFiles(tempPath))
-            {
-                if (!Directory.GetFiles(f).Contains("romfs") || !Directory.GetFiles(f).Contains("exefs"))
-                {
-                    ImGui.OpenPopup("Error Importing Mod");
-                    FileUtils.ReloadDirectory(tempPath);
-                    return false;
-                }
-            }
-
-            string romfsPath = Directory.GetDirectories(file, "romfs", SearchOption.AllDirectories)[0];
-            string exefsPath = Directory.GetDirectories(file, "exefs", SearchOption.AllDirectories)[0];
-
-
-
-            File.Copy(file, "mods");
-
-            FileUtils.CopyDirectory(romfsPath, ryuModsPath + "\\romfs");
-            FileUtils.CopyDirectory(exefsPath, ryuModsPath + "\\exefs");
-            FileUtils.CreateDirectorySafe("mods");
-            return true;
-        }
-
-        public static byte[] ToBytes(this Dictionary<ulong, (string, AFile[])> dict)
+        public static byte[] ToBytes(this Dictionary<ulong, GbModInfo> dict)
         {
             using MemoryStream stream = new();
             using BinaryWriter writer = new(stream, Encoding.UTF8);
             writer.Write(dict.Count);
             dict.Keys.ForEach(x => writer.Write(x));
-            foreach (var (name, files) in dict.Values)
+            foreach (var (name, owner, files) in dict.Values)
             {
                 writer.Write(name);
+                writer.Write(owner);
                 writer.Write(files.Length);
                 foreach (var file in files)
                 {
@@ -169,17 +98,18 @@ namespace Theatre.Utils
             }
             return stream.ToArray();
         }
-        public static Dictionary<ulong, (string, AFile[])> FromBytes(byte[] data)
+        public static Dictionary<ulong, GbModInfo> FromBytes(byte[] data)
         {
             using MemoryStream stream = new(data);
             using BinaryReader reader = new(stream, Encoding.UTF8);
             int count = reader.ReadInt32();
-            Dictionary<ulong, (string, AFile[])> result = new(count);
+            Dictionary<ulong, GbModInfo> result = new(count);
             for (int i = 0; i < count; i++)
-                result[reader.ReadUInt64()] = (string.Empty, Array.Empty<AFile>());
+                result[reader.ReadUInt64()] = new();
             foreach (var key in result.Keys)
             {
                 string name = reader.ReadString();
+                string owner = reader.ReadString();
                 AFile[] files = new AFile[reader.ReadInt32()];
                 for (int i = 0; i < files.Length; i++)
                     files[i] = new();
@@ -199,20 +129,70 @@ namespace Theatre.Utils
                     file.sAnalysisResult = reader.ReadString();
                     file.bContainsExe = reader.ReadBoolean();
                 }
-                result[key] = (name, files);
+                result[key] = new(name, owner, files);
             }
             return result;
         }
-        public static void FromBytes(ref Dictionary<ulong, (string, AFile[])> dict, byte[] data)
+        public static void FromBytes(ref Dictionary<ulong, GbModInfo> dict, byte[] data)
         {
             dict = FromBytes(data);
         }
-        public static void UpdateEntries(this Dictionary<ulong, (string, AFile[])> dict, GBGame game)
+        public static void UpdateEntries(this Dictionary<ulong, GbModInfo> dict, GBGame game)
         {
             var submissons = GBUtils.GetSubmissions(game);
             submissons.Where(x => !dict.ContainsKey(x)).
                 Select(x => (x, GBUtils.GetSubmissionData(x)))
                 .ForEach(tup => dict[tup.x] = tup.Item2);
+        }
+        public static List<DirectoryInfo> DownloadSwitchMod(this GbModInfo info)
+        {
+            using var client = new HttpClient();
+            var dl = (string url) => client.GetStreamAsync(url).GetAwaiter().GetResult(); 
+            DirectoryInfo exedir = new FileInfo(Environment.ProcessPath!).Directory!;
+            DirectoryInfo moddir = new(Path.Join(exedir.FullName, "Mods"));
+            moddir.Create();
+            List<DirectoryInfo> infos = new();
+            List<DirectoryInfo> result = new();
+            foreach (var file in info.Files)
+            {
+                FileInfo finfo = new(file.sFile);
+                DirectoryInfo dinfo = new(Path.Join(moddir.FullName, 
+                    Path.GetFileNameWithoutExtension(finfo.Name)));
+                dinfo.Create();
+                using var stream = dl(file.sDownloadUrl);
+                if (finfo.Extension == ".zip")
+                {
+                    using var reader = new ZipArchive(stream, ZipArchiveMode.Read);
+                    reader.ExtractToDirectory(dinfo.FullName, true);
+                } 
+                else if (finfo.Extension == ".rar")
+                {
+                    using var reader = RarArchive.Open(stream);
+                    reader.WriteToDirectory(dinfo.FullName, new()
+                    {
+                        ExtractFullPath = true,
+                        Overwrite = true,
+                        PreserveAttributes = true,
+                        PreserveFileTime = true
+                    });
+                } 
+                else if (finfo.Extension == ".7zip")
+                {
+                    using var reader = SevenZipArchive.Open(stream);
+                    reader.WriteToDirectory(dinfo.FullName, new()
+                    {
+                        ExtractFullPath = true,
+                        Overwrite = true,
+                        PreserveAttributes = true,
+                        PreserveFileTime = true
+                    });
+                }
+                infos.Add(dinfo);
+            }
+            foreach (var dinfo in infos)
+                result.AddRange(dinfo.EnumerateDirectories()
+                    .Where(x => x.Name == "romfs" || x.Name == "exefs"));
+            return result;
         }
     }
 }

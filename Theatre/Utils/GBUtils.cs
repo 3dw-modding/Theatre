@@ -21,7 +21,50 @@ static class GBLinks
     }
     public static string GetSubmissionDataLink(ulong id)
     {
-        return $"https://api.gamebanana.com/Core/Item/Data?itemtype=Mod&itemid={id}&fields=name,Files().aFiles()";
+        return $"https://api.gamebanana.com/Core/Item/Data?itemtype=Mod&itemid={id}&fields=name,Owner().name,Files().aFiles()";
+    }
+}
+
+public sealed class GbModInfo
+{
+    public string Name = string.Empty;
+    public string Owner = string.Empty;
+    public List<AFile> Files = new();
+    public static GbModInfo Parse(JsonArray array)
+    {
+        GbModInfo result = new()
+        {
+            Name = array[0]?.Deserialize<string>() ?? string.Empty,
+            Owner = array[1]?.Deserialize<string>() ?? string.Empty
+        };
+        foreach (var item in array.Skip(2))
+        {
+            var inner = item?.AsObject();
+            if (inner is not null)
+                foreach (var (_, value) in inner)
+                    if (value is not null)
+                    {
+                        var o = value.AsObject();
+                        AFile file = new();
+                        file.Parse(o);
+                        result.Files.Add(file);
+                    }
+        }
+        return result;
+    }
+    public static implicit operator GbModInfo(JsonArray array) => Parse(array);
+    public void Deconstruct(out string name, out string owner, out AFile[] files)
+    {
+        name = Name;
+        owner = Owner;
+        files = Files.ToArray();
+    }
+    public GbModInfo() { }
+    public GbModInfo(string name, string owner, IEnumerable<AFile> files)
+    {
+        Name = name;
+        Owner = owner;
+        Files = new(files);
     }
 }
 
@@ -73,41 +116,26 @@ public static class GBUtils
     }
 
     [Obsolete("For removal, moving to a separate private project for this.")]
-    public static (string, AFile[]) GetSubmissionData(ulong id)
+    public static GbModInfo GetSubmissionData(ulong id)
     {
-        List<AFile> files = new();
         using var client = new HttpClient();
         var data = client.GetStringAsync(GBLinks.GetSubmissionDataLink(id)).GetAwaiter().GetResult();
         var doc = JsonDocument.Parse(data);
         var arr = doc.Deserialize<JsonArray>() ?? new JsonArray();
-        var name = arr[0]?.Deserialize<string>() ?? string.Empty;
-        foreach (var item in arr.Skip(1))
-        {
-            var inner = item?.AsObject();
-            if (inner is not null)
-                foreach (var (_, val) in inner)
-                    if (val is not null)
-                    {
-                        var o = val.AsObject();
-                        AFile file = new();
-                        file.Parse(o);
-                        files.Add(file);
-                    }
-        }
-        return (name, files.ToArray());
+        return arr;
     }
 
     [Obsolete("For removal, moving to a separate private project for this.")]
-    public static Dictionary<ulong, (string, AFile[])> GetAllSubmissions(GBGame game, ulong page = 1)
+    public static Dictionary<ulong, GbModInfo> GetAllSubmissions(GBGame game, ulong page = 1)
     {
         return GetSubmissions(game, page).Select(x => (x, GetSubmissionData(x)))
             .ToDictionary(x => x.x, x => x.Item2);
     }
 
     [Obsolete("For removal, moving to a separate private project for this.")]
-    public static Dictionary<ulong, (string, AFile[])> GetEverySingleSubmission(GBGame game)
+    public static Dictionary<ulong, GbModInfo> GetEverySingleSubmission(GBGame game)
     {
-        Dictionary<ulong, (string, AFile[])> result = new();
+        Dictionary<ulong, GbModInfo> result = new();
         ulong page = 1;
         var subs = GetAllSubmissions(game, page++);
         while (subs.Count != 0)
@@ -122,6 +150,6 @@ public static class GBUtils
 
 public static class CachedGBMods
 {
-    public static Dictionary<ulong, (string, AFile[])> AllWiiUModsCached = new();
-    public static Dictionary<ulong, (string, AFile[])> AllSwitchModsCached = new();
+    public static Dictionary<ulong, GbModInfo> AllWiiUModsCached = new();
+    public static Dictionary<ulong, GbModInfo> AllSwitchModsCached = new();
 }
