@@ -4,6 +4,9 @@ namespace Theatre.Utils
 {
     public static class FileUtils
     {
+        /**
+         * Ensures the creation of a directory
+         */
         public static void CreateDirectorySafe(string path)
         {
             if (Directory.Exists(path))
@@ -15,6 +18,9 @@ namespace Theatre.Utils
             Directory.CreateDirectory(path);
         }
 
+        /**
+         * Reloads the content of a directory
+         */
         public static void ReloadDirectory(string path)
         {
             if (Directory.Exists(path))
@@ -22,7 +28,7 @@ namespace Theatre.Utils
                 Directory.Delete(path);
             }
 
-            Directory.CreateDirectory(path);
+            CreateDirectorySafe(path);
         }
 
         public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive = true)
