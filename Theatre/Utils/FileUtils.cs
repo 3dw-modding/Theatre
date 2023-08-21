@@ -1,5 +1,10 @@
-﻿using SharpCompress;
+﻿using ImGuiNET;
+using SharpCompress;
+using SharpCompress.Archives.Rar;
+using SharpCompress.Archives.SevenZip;
+using System.IO.Compression;
 using System.Text;
+using SharpCompress.Archives;
 
 namespace Theatre.Utils
 {
@@ -65,6 +70,77 @@ namespace Theatre.Utils
                 }
             }
         }
+
+        public static void Download(string url, string path)
+        {
+            using var client = new HttpClient();
+            var data = client.GetByteArrayAsync(url).GetAwaiter().GetResult();
+
+            File.WriteAllBytes(path, data);
+        }
+
+        public static bool TryImportMod(string file, string ryuModsPath)
+        {
+            string tempPath = Path.GetTempPath() + "TheatreUI";
+
+            Console.WriteLine(file);
+            Directory.CreateDirectory(tempPath);
+
+            using (var stream = File.OpenRead(file))
+            {
+                if (Path.GetExtension(file) == ".rar")
+                {
+                    using var reader = RarArchive.Open(stream);
+                    foreach (var entry in reader.Entries.Where(x => !x.IsDirectory))
+                    {
+                        FileInfo f = new(tempPath + "\\" + entry.Key);
+                        f.Directory?.Create();
+                        using var estream = entry.OpenEntryStream();
+                        using var fstream = f.Create();
+                        estream.CopyTo(fstream);
+                    }
+                }
+                else if (Path.GetExtension(file) == ".7z")
+                {
+                    using var reader = SevenZipArchive.Open(stream);
+                    reader.WriteToDirectory(tempPath, new()
+                    {
+                        ExtractFullPath = true,
+                        Overwrite = true,
+                        PreserveAttributes = true,
+                        PreserveFileTime = true
+                    });
+                }
+                else if (Path.GetExtension(file) == ".zip")
+                {
+                    using var reader = new ZipArchive(stream, ZipArchiveMode.Read);
+                    reader.ExtractToDirectory(tempPath, true);
+                }
+            }
+
+            foreach (var f in Directory.EnumerateFiles(tempPath))
+            {
+                if (!Directory.GetFiles(f).Contains("romfs") || !Directory.GetFiles(f).Contains("exefs"))
+                {
+                    ImGui.OpenPopup("Error Importing Mod");
+                    FileUtils.ReloadDirectory(tempPath);
+                    return false;
+                }
+            }
+
+            string romfsPath = Directory.GetDirectories(file, "romfs", SearchOption.AllDirectories)[0];
+            string exefsPath = Directory.GetDirectories(file, "exefs", SearchOption.AllDirectories)[0];
+
+
+
+            File.Copy(file, "mods");
+
+            FileUtils.CopyDirectory(romfsPath, ryuModsPath + "\\romfs");
+            FileUtils.CopyDirectory(exefsPath, ryuModsPath + "\\exefs");
+            FileUtils.CreateDirectorySafe("mods");
+            return true;
+        }
+
         public static byte[] ToBytes(this Dictionary<ulong, (string, AFile[])> dict)
         {
             using MemoryStream stream = new();
