@@ -5,6 +5,8 @@ using Theatre.Utils;
 using SharpCompress.Readers;
 using SharpCompress.Archives.SevenZip;
 using SharpCompress.Archives;
+using System.IO.Compression;
+using SharpCompress.Archives.Rar;
 
 namespace Theatre.Handlers
 {
@@ -38,19 +40,19 @@ namespace Theatre.Handlers
 
                     using (var stream = info.OpenRead())
                     {
-                        // Zip and Rar get handled by ReaderFactory, but 7z isn't.
-                        if (info.Extension != ".7z")
+                        if (info.Extension == ".rar")
                         {
-                            using var reader = ReaderFactory.Open(stream);
-                            reader.WriteAllToDirectory(tempPath, new()
+                            using var reader = RarArchive.Open(stream);
+                            foreach (var entry in reader.Entries.Where(x => !x.IsDirectory))
                             {
-                                ExtractFullPath = true,
-                                Overwrite = true,
-                                PreserveFileTime = true,
-                                PreserveAttributes = true
-                            });
+                                FileInfo f = new(tempPath + "\\" + entry.Key);
+                                f.Directory?.Create();
+                                using var estream = entry.OpenEntryStream();
+                                using var fstream = f.Create();
+                                estream.CopyTo(fstream);
+                            }
                         }
-                        else
+                        else if (info.Extension == ".7z")
                         {
                             using var reader = SevenZipArchive.Open(stream);
                             reader.WriteToDirectory(tempPath, new()
@@ -60,6 +62,10 @@ namespace Theatre.Handlers
                                 PreserveAttributes = true,
                                 PreserveFileTime = true
                             });
+                        } else if (info.Extension == ".zip")
+                        {
+                            using var reader = new ZipArchive(stream, ZipArchiveMode.Read);
+                            reader.ExtractToDirectory(tempPath, true);
                         }
                     }
 
