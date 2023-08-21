@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using SharpCompress;
+using System.Text;
 
 namespace Theatre.Utils
 {
@@ -64,33 +65,67 @@ namespace Theatre.Utils
                 }
             }
         }
-        /// <summary>
-        /// Transforms any object into a byte array, this is the method your mom told you not to worry about.
-        /// </summary>
-        /// <typeparam name="T">The type to use.</typeparam>
-        /// <param name="obj">The object to be converted.</param>
-        /// <returns>
-        /// A <see cref="byte"/>[] with it's <see cref="Array.Length"/> being sizeof(<typeparamref name="T"/>).
-        /// </returns>
-        public static byte[] GetBytes<T>(T obj)
+        public static byte[] ToBytes(this Dictionary<ulong, (string, AFile[])> dict)
         {
-            byte[] result = new byte[Unsafe.SizeOf<T>()];
-            Unsafe.As<byte, T>(ref result[0]) = obj;
-            return result;
+            using MemoryStream stream = new();
+            using BinaryWriter writer = new(stream, Encoding.UTF8);
+            writer.Write(dict.Count);
+            dict.Keys.ForEach(x => writer.Write(x));
+            foreach (var (name, files) in dict.Values)
+            {
+                writer.Write(name);
+                writer.Write(files.Length);
+                foreach (var file in files)
+                {
+                    writer.Write(file.idRow);
+                    writer.Write(file.sFile);
+                    writer.Write(file.nFilesize);
+                    writer.Write(file.sDescription);
+                    writer.Write(file.tsDateAdded);
+                    writer.Write(file.nDownloadCount);
+                    writer.Write(file.sAnalysisState);
+                    writer.Write(file.sDownloadUrl);
+                    writer.Write(file.sMd5Checksum);
+                    writer.Write(file.sClamAvResult);
+                    writer.Write(file.sAnalysisResult);
+                    writer.Write(file.bContainsExe);
+                }
+            }
+            return stream.ToArray();
         }
-        /// <summary>
-        /// Transforms a byte array into any object, this is the method your mom told you not to worry about.
-        /// </summary>
-        /// <typeparam name="T">The type to use.</typeparam>
-        /// <param name="data">The array to be converted.</param>
-        /// <returns>
-        /// If the span's length is not sizeof(<typeparamref name="T"/>), default. Otherwise the casted value.
-        /// </returns>
-        public static T? FromBytes<T>(Span<byte> data)
+        public static Dictionary<ulong, (string, AFile[])> FromBytes(byte[] data)
         {
-            if (data.Length != Unsafe.SizeOf<T>())
-                return default;
-            return Unsafe.As<byte, T>(ref data[0]);
+            using MemoryStream stream = new(data);
+            using BinaryReader reader = new(stream, Encoding.UTF8);
+            int count = reader.ReadInt32();
+            Dictionary<ulong, (string, AFile[])> result = new(count);
+            for (int i = 0; i < count; i++)
+                result[reader.ReadUInt64()] = (string.Empty, Array.Empty<AFile>());
+            foreach (var key in result.Keys)
+            {
+                string name = reader.ReadString();
+                AFile[] files = new AFile[reader.ReadInt32()];
+                for (int i = 0; i < files.Length; i++)
+                    files[i] = new();
+                for (int i = 0; i < files.Length; i++)
+                {
+                    ref var file = ref files[i];
+                    file.idRow = reader.ReadUInt64();
+                    file.sFile = reader.ReadString();
+                    file.nFilesize = reader.ReadUInt64();
+                    file.sDescription = reader.ReadString();
+                    file.tsDateAdded = reader.ReadUInt64();
+                    file.nDownloadCount = reader.ReadUInt64();
+                    file.sAnalysisState = reader.ReadString();
+                    file.sDownloadUrl = reader.ReadString();
+                    file.sMd5Checksum = reader.ReadString();
+                    file.sClamAvResult = reader.ReadString();
+                    file.sAnalysisResult = reader.ReadString();
+                    file.bContainsExe = reader.ReadBoolean();
+                }
+                result[key] = (name, files);
+            }
+            return result;
         }
     }
 }
