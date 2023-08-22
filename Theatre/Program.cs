@@ -91,8 +91,7 @@ namespace Theatre
                 ImGui.Begin("MainWindow", ImGuiWindowFlags.NoDecoration);
 
                 FrameHandler.RunFrame(window, ref selectedFiles,
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Ryujinx", "mods", "contents", "010028600EBDA000"),
-                    "mods");
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Ryujinx", "mods", "contents", "010028600EBDA000"));
 
 
                 ImGui.End();

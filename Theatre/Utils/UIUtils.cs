@@ -22,11 +22,25 @@ namespace Theatre.Utils
             return ImGui.Button(label, size);
         }
 
+        public static void Text(IWindow window, string text, bool centered = false)
+        {
+            if (centered)
+                ImGui.SetCursorPos(CenterCursorWithText(window, text));
+            ImGui.Text(text);
+        }
+
         public static void TextColoured(IWindow window, Colour colour, string text, bool centered = true)
         {
             if (centered)
                 ImGui.SetCursorPos(CenterCursorWithText(window, text));
-            ImGui.TextColored(colour.ToVector4(), text);
+            try
+            {
+                ImGui.TextColored(colour.ToVector4(), text);
+            }
+            catch (AccessViolationException _)
+            {
+                Console.WriteLine(_.StackTrace);
+            }
         }
     }
 }
