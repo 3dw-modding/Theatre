@@ -10,7 +10,26 @@ using Theatre.Utils;
 
 namespace Theatre
 {
-    // TODO: Add comments to as much as possible, unless someone does it for me, ill do that next push (maybe probably)
+    /** TODO: URGENT TODOs, DO RIGHT AWAY
+     * TODO: Lord needs to fix FileUtils@126 throwing an OverflowException
+     */
+
+
+
+    /** TODOs
+     * TODO: Add documentation to as much as possible
+     * TODO: Remove most of GBUtils and make the database creator
+     * TODO: Add actual functional UI to browse mods
+     * TODO: Make buttons to download mods
+     */
+
+
+    /** Not as important TODOs
+     * TODO: TODOs (for lord) on FileUtils@82, FileUtils@113, FileUtils@150, FileUtils@156, FileUtils@165 -Scyye
+     * 
+     * TODO: Find a way to make Visual Studio stop saying that Theatre is spelt wrong.
+     */
+
 
     public static class Program 
     {

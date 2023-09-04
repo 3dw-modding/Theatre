@@ -16,16 +16,16 @@ namespace Theatre.Handlers
         static bool wiiu, swch = false;
         public static void RunFrame(IWindow window, ref List<string> selectedFiles, string ryuModsPath)
         {
-            TextColoured(window, new Colour(1, 0, 0), "3DW Mod Manager");
+            TextColoured(window, new Colour(1, 0, 0), "Theatre");
 
             ImGui.GetFont().FontSize *= 1.4f;
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() * 1.05f);
-            TextColoured(window, new Colour(0, 0, 1), "Theatre");
+            TextColoured(window, new Colour(0, 0, 1), "3DW Mod Manager");
             ImGui.GetFont().FontSize /= 1.4f;
 
             ImGui.GetStyle().FrameRounding = 12f;
 
-            var tempPath = Path.GetTempPath() + "ModManagerUI";
+            var tempPath = Path.GetTempPath() + "Theatre";
 
             ImGui.ShowDemoWindow();
 
@@ -38,10 +38,10 @@ namespace Theatre.Handlers
                 ImGui.BeginChild("mod_list_wiiu");
                 foreach (var keyValuePair in CachedGBMods.AllWiiUModsCached)
                 {
-                    Text(window, keyValuePair.Value.Item1.LimitChars(15).FormatModList("Author"));
+                    Text(window, keyValuePair.Value.Name.LimitChars(15).FormatModList(keyValuePair.Value.Owner));
                     if (Button("[DOWNLOAD]"))
                     {
-                        FileUtils.Download(keyValuePair.Value.Item2[0].sDownloadUrl, "mods");
+
                     }
                 }
                 swch = false;
@@ -52,11 +52,10 @@ namespace Theatre.Handlers
                 ImGui.BeginChild("mod_list_switch");
                 foreach (var keyValuePair in CachedGBMods.AllSwitchModsCached)
                 {
-                    Text(window, keyValuePair.Value.Item1.LimitChars(15).FormatModList("Author"));
-                    
+                    Text(window, keyValuePair.Value.Name.LimitChars(15).FormatModList(keyValuePair.Value.Owner));
                     if (Button("[DOWNLOAD]"))
                     {
-                        FileUtils.Download(keyValuePair.Value.Item2[0].sDownloadUrl, "mods");
+
                     }
                     
                 }
@@ -68,8 +67,7 @@ namespace Theatre.Handlers
                 var filePick = Nfd.FileOpen(new []{NfdFilterPresets.ZipFiles}, "Downloads");
                 if (filePick.Status == NfdStatus.Ok)
                 {
-
-                    FileUtils.TryImportMod(filePick.Path, ryuModsPath);
+                    
                 }
             }
 

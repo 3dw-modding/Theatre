@@ -9,9 +9,10 @@ namespace Theatre.Utils
 {
     public static class FileUtils
     {
-        /**
-         * Ensures the creation of a directory
-         */
+        /// <summary>
+        /// Ensures the creation of a directory
+        /// </summary>
+        /// <param name="path">The path to the directory</param>
         public static void CreateDirectorySafe(string path)
         {
             if (Directory.Exists(path))
@@ -23,9 +24,10 @@ namespace Theatre.Utils
             Directory.CreateDirectory(path);
         }
 
-        /**
-         * Reloads the content of a directory
-         */
+        /// <summary>
+        /// Reloads the content of a directory
+        /// </summary>
+        /// <param name="path">The path to the directory</param>
         public static void ReloadDirectory(string path)
         {
             if (Directory.Exists(path))
@@ -36,6 +38,13 @@ namespace Theatre.Utils
             CreateDirectorySafe(path);
         }
 
+        /// <summary>
+        /// Copies a directory from one place to another
+        /// </summary>
+        /// <param name="sourceDir">The directory to copy from</param>
+        /// <param name="destinationDir">The directory to copy to</param>
+        /// <param name="recursive">Defaults to true. Should it copy all sub directories and files as well?</param>
+        /// <exception cref="DirectoryNotFoundException">If the source directory doesn't exist</exception>
         public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive = true)
         {
             // Get information about the source directory
@@ -69,6 +78,8 @@ namespace Theatre.Utils
                 }
             }
         }
+        
+        // TODO: Lord, write documentation for this. -Scyye
         public static byte[] ToBytes(this Dictionary<ulong, GbModInfo> dict)
         {
             using MemoryStream stream = new();
@@ -98,6 +109,8 @@ namespace Theatre.Utils
             }
             return stream.ToArray();
         }
+
+        // TODO: Lord, write documentation for this. -Scyye
         public static Dictionary<ulong, GbModInfo> FromBytes(byte[] data)
         {
             using MemoryStream stream = new(data);
@@ -129,14 +142,18 @@ namespace Theatre.Utils
                     file.sAnalysisResult = reader.ReadString();
                     file.bContainsExe = reader.ReadBoolean();
                 }
-                result[key] = new(name, owner, files);
+                result[key] = new(name, owner, new AFile[]{});
             }
             return result;
         }
+
+        // TODO: Lord, write documentation for this. -Scyye
         public static void FromBytes(ref Dictionary<ulong, GbModInfo> dict, byte[] data)
         {
             dict = FromBytes(data);
         }
+
+        // TODO: Lord, write documentation for this. -Scyye
         public static void UpdateEntries(this Dictionary<ulong, GbModInfo> dict, GBGame game)
         {
             var submissons = GBUtils.GetSubmissions(game);
@@ -144,6 +161,8 @@ namespace Theatre.Utils
                 Select(x => (x, GBUtils.GetSubmissionData(x)))
                 .ForEach(tup => dict[tup.x] = tup.Item2);
         }
+
+        // TODO: Lord, write documentation for this. -Scyye
         public static List<DirectoryInfo> DownloadSwitchMod(this GbModInfo info)
         {
             using var client = new HttpClient();
