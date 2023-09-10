@@ -10,12 +10,6 @@ using Theatre.Utils;
 
 namespace Theatre
 {
-    /** TODO: URGENT TODOs, DO RIGHT AWAY
-     * TODO: Lord needs to fix FileUtils@126 throwing an OverflowException
-     */
-
-
-
     /** TODOs
      * TODO: Add documentation to as much as possible
      * TODO: Remove most of GBUtils and make the database creator
@@ -25,7 +19,6 @@ namespace Theatre
 
 
     /** Not as important TODOs
-     * TODO: TODOs (for lord) on FileUtils@82, FileUtils@113, FileUtils@150, FileUtils@156, FileUtils@165 -Scyye
      * 
      * TODO: Find a way to make Visual Studio stop saying that Theatre is spelt wrong.
      */

@@ -79,7 +79,11 @@ namespace Theatre.Utils
             }
         }
         
-        // TODO: Lord, write documentation for this. -Scyye
+        /// <summary>
+        /// Converts a Dictionary of mod entries into parable bytes.
+        /// </summary>
+        /// <param name="dict">The dictionary to convert.</param>
+        /// <returns><see cref="byte"/>[]</returns>
         public static byte[] ToBytes(this Dictionary<ulong, GbModInfo> dict)
         {
             using MemoryStream stream = new();
@@ -110,7 +114,14 @@ namespace Theatre.Utils
             return stream.ToArray();
         }
 
-        // TODO: Lord, write documentation for this. -Scyye
+        /// <summary>
+        /// Converts a (hopefully) parsable array of bytes into a Dictonary of mod info.
+        /// </summary>
+        /// <param name="data">The byte array to parse.</param>
+        /// <returns>A Dictionary of mod entries.</returns>
+        /// <exception cref="EndOfStreamException"></exception>
+        /// <exception cref="ObjectDisposedException"></exception>
+        /// <exception cref="IOException"></exception>
         public static Dictionary<ulong, GbModInfo> FromBytes(byte[] data)
         {
             using MemoryStream stream = new(data);
@@ -142,12 +153,19 @@ namespace Theatre.Utils
                     file.sAnalysisResult = reader.ReadString();
                     file.bContainsExe = reader.ReadBoolean();
                 }
-                result[key] = new(name, owner, new AFile[]{});
+                result[key] = new(name, owner, files);
             }
             return result;
         }
 
-        // TODO: Lord, write documentation for this. -Scyye
+        /// <summary>
+        /// Calls <see cref="FromBytes(byte[])"/> and sets the <paramref name="dict"/> to the result.
+        /// </summary>
+        /// <param name="dict">The dict to modify</param>
+        /// <param name="data">The data to parse</param>
+        /// <exception cref="EndOfStreamException"></exception>
+        /// <exception cref="ObjectDisposedException"></exception>
+        /// <exception cref="IOException"></exception>
         public static void FromBytes(ref Dictionary<ulong, GbModInfo> dict, byte[] data)
         {
             dict = FromBytes(data);
@@ -162,7 +180,12 @@ namespace Theatre.Utils
                 .ForEach(tup => dict[tup.x] = tup.Item2);
         }
 
-        // TODO: Lord, write documentation for this. -Scyye
+        /// <summary>
+        /// Attempts to download a Switch mod from Gamebanana
+        /// </summary>
+        /// <param name="info">The info to use.</param>
+        /// <returns>The Directories that have romfs or exefs as their name</returns>
+        /// <exception cref="HttpRequestException"></exception>
         public static List<DirectoryInfo> DownloadSwitchMod(this GbModInfo info)
         {
             using var client = new HttpClient();
