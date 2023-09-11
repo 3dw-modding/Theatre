@@ -4,6 +4,9 @@ using System.Text;
 using SharpCompress.Archives.Rar;
 using SharpCompress.Archives;
 using SharpCompress.Archives.SevenZip;
+using System.Text.Json;
+using Newtonsoft.Json;
+using Theatre.Handlers;
 
 namespace Theatre.Utils
 {
@@ -202,15 +205,16 @@ namespace Theatre.Utils
                     Path.GetFileNameWithoutExtension(finfo.Name)));
                 dinfo.Create();
                 using var stream = dl(file.sDownloadUrl);
+                
                 if (finfo.Extension == ".zip")
                 {
                     using var reader = new ZipArchive(stream, ZipArchiveMode.Read);
-                    reader.ExtractToDirectory(dinfo.FullName, true);
+                    reader.ExtractToDirectory(Path.Join(Path.GetTempPath(), "Theatre", dinfo.Name), true);
                 } 
                 else if (finfo.Extension == ".rar")
                 {
                     using var reader = RarArchive.Open(stream);
-                    reader.WriteToDirectory(dinfo.FullName, new()
+                    reader.WriteToDirectory(Path.Join(Path.GetTempPath(), "Theatre", dinfo.Name), new()
                     {
                         ExtractFullPath = true,
                         Overwrite = true,
@@ -218,10 +222,10 @@ namespace Theatre.Utils
                         PreserveFileTime = true
                     });
                 } 
-                else if (finfo.Extension == ".7zip")
+                else if (finfo.Extension == ".7z")
                 {
                     using var reader = SevenZipArchive.Open(stream);
-                    reader.WriteToDirectory(dinfo.FullName, new()
+                    reader.WriteToDirectory(Path.Join(Path.GetTempPath(), "Theatre", dinfo.Name), new()
                     {
                         ExtractFullPath = true,
                         Overwrite = true,
@@ -229,12 +233,84 @@ namespace Theatre.Utils
                         PreserveFileTime = true
                     });
                 }
+                stream.Close();
+                
+                var finfoStream = File.Create(Path.Join(dinfo.FullName, "FileInfo.json"));
+                finfoStream.Close();
+                File.WriteAllText(Path.Join(dinfo.FullName, "FileInfo.json"), JsonConvert.SerializeObject(
+                    new FInfo() {
+                        Name = info.Name,
+                        Owner = info.Owner,
+                        Description = file.sDescription
+                    }));
                 infos.Add(dinfo);
+                
             }
             foreach (var dinfo in infos)
                 result.AddRange(dinfo.EnumerateDirectories()
                     .Where(x => x.Name == "romfs" || x.Name == "exefs"));
             return result;
         }
+
+        /// <summary>
+        /// Attempts to download a Switch mod from Gamebanana
+        /// </summary>
+        /// <param name="info">The info to use.</param>
+        /// <returns>The Directories that have romfs or exefs as their name</returns>
+        /// <exception cref="HttpRequestException"></exception>
+        public static List<DirectoryInfo> DownloadSwitchMod(string path, FInfo info)
+        {
+            DirectoryInfo exedir = new FileInfo(Environment.ProcessPath!).Directory!;
+            DirectoryInfo moddir = new(Path.Join(exedir.FullName, "Mods"));
+            moddir.Create();
+            List<DirectoryInfo> infos = new();
+            List<DirectoryInfo> result = new();
+
+            FileInfo finfo = new(path);
+            DirectoryInfo dinfo = new(Path.Join(moddir.FullName,
+                Path.GetFileNameWithoutExtension(finfo.Name)));
+            dinfo.Create();
+
+            var stream = finfo.Open(FileMode.OpenOrCreate);
+
+            if (finfo.Extension == ".zip")
+            {
+                using var reader = new ZipArchive(stream, ZipArchiveMode.Read);
+                reader.ExtractToDirectory(dinfo.FullName, true);
+            }
+            else if (finfo.Extension == ".rar")
+            {
+                using var reader = RarArchive.Open(stream);
+                reader.WriteToDirectory(dinfo.FullName, new()
+                {
+                    ExtractFullPath = true,
+                    Overwrite = true,
+                    PreserveAttributes = true,
+                    PreserveFileTime = true
+                });
+            }
+            else if (finfo.Extension == ".7zip")
+            {
+                using var reader = SevenZipArchive.Open(stream);
+                reader.WriteToDirectory(dinfo.FullName, new()
+                {
+                    ExtractFullPath = true,
+                    Overwrite = true,
+                    PreserveAttributes = true,
+                    PreserveFileTime = true
+                });
+            }
+            var str = File.Create(Path.Join(dinfo.FullName, "FileInfo.json"));
+            str.Close();
+            File.WriteAllText(Path.Join(dinfo.FullName, "FileInfo.json"), JsonConvert.SerializeObject(
+                info));
+            
+            result.AddRange(dinfo.EnumerateDirectories()
+                .Where(x => x.Name == "romfs" || x.Name == "exefs"));
+            stream.Close();
+            return result;
+        }
+        
+        }
     }
-}
+
