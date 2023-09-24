@@ -2,11 +2,6 @@
 using NativeFileDialogExtendedSharp;
 using Silk.NET.Windowing;
 using Theatre.Utils;
-using SharpCompress.Readers;
-using SharpCompress.Archives.SevenZip;
-using SharpCompress.Archives;
-using System.IO.Compression;
-using SharpCompress.Archives.Rar;
 using static Theatre.Utils.UIUtils;
 using System.Text.Json.Nodes;
 using System.Text.Json;
@@ -56,7 +51,8 @@ namespace Theatre.Handlers
             {
                 case 0:
                     {
-                        var moddir = new FileInfo(Path.Join(new FileInfo(Environment.ProcessPath!).Directory!.FullName, "Mods"));
+                        var moddir = new DirectoryInfo(Path.Join(new FileInfo(Environment.ProcessPath!).Directory!.FullName, "Mods"));
+                        moddir.Create();
                         var files = Directory.GetDirectories(moddir.FullName);
                         for (int i = 0; i < files.Length; i++)
                         {
@@ -81,13 +77,14 @@ namespace Theatre.Handlers
                             ImGui.BeginChild("mod_list_switch");
                             foreach (var keyValuePair in CachedGBMods.AllSwitchModsCached)
                             {
-                                Text(window, keyValuePair.Value.Name.LimitChars(15).FormatModList(keyValuePair.Value.Owner));
-                                if (Button("[DOWNLOAD]"))
+                                //Text(window, keyValuePair.Value.Name.LimitChars(15).FormatModList(keyValuePair.Value.Owner));
+                                if (Button(keyValuePair.Value.Name.LimitChars(15).FormatModList(keyValuePair.Value.Owner)))
                                 {
                                     keyValuePair.Value.DownloadSwitchMod();
                                 }
 
                             }
+                            ImGui.EndChild();
                             wiiu = false;
                         }
 
@@ -97,12 +94,13 @@ namespace Theatre.Handlers
                             ImGui.BeginChild("mod_list_wiiu");
                             foreach (var keyValuePair in CachedGBMods.AllWiiUModsCached)
                             {
-                                Text(window, keyValuePair.Value.Name.LimitChars(15).FormatModList(keyValuePair.Value.Owner));
-                                if (Button("[DOWNLOAD]"))
+                                //Text(window, keyValuePair.Value.Name.LimitChars(15).FormatModList(keyValuePair.Value.Owner));
+                                if (Button(keyValuePair.Value.Name.LimitChars(15).FormatModList(keyValuePair.Value.Owner)))
                                 {
-
+                                    keyValuePair.Value.DownloadWiiUMod();
                                 }
                             }
+                            ImGui.EndChild();
                             swch = false;
                         }
 

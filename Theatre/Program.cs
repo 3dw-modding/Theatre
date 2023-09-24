@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Numerics;
+﻿using System.Numerics;
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
@@ -10,11 +9,6 @@ using Theatre.Utils;
 
 namespace Theatre
 {
-    /** URGENT TODOs DO RIGHT AWAY
-     * TODO: Lord, Fix only downloading Grassy Peak when using the mod browser -Scyye
-     */
-    
-
     /** TODOs
      * TODO: Add documentation to as much as possible
      * TODO: Remove most of GBUtils and make the database creator

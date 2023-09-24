@@ -4,7 +4,6 @@ using System.Text;
 using SharpCompress.Archives.Rar;
 using SharpCompress.Archives;
 using SharpCompress.Archives.SevenZip;
-using System.Text.Json;
 using Newtonsoft.Json;
 using Theatre.Handlers;
 
@@ -191,8 +190,8 @@ namespace Theatre.Utils
         /// <exception cref="HttpRequestException"></exception>
         public static List<DirectoryInfo> DownloadSwitchMod(this GbModInfo info)
         {
-            using var client = new HttpClient();
-            var dl = (string url) => client.GetStreamAsync(url).GetAwaiter().GetResult(); 
+            using HttpClient client = new();
+            Stream dl(string url) => client.GetStreamAsync(url).GetAwaiter().GetResult();
             DirectoryInfo exedir = new FileInfo(Environment.ProcessPath!).Directory!;
             DirectoryInfo moddir = new(Path.Join(exedir.FullName, "Mods"));
             moddir.Create();
@@ -235,20 +234,104 @@ namespace Theatre.Utils
                 }
                 stream.Close();
                 
-                var finfoStream = File.Create(Path.Join(dinfo.FullName, "FileInfo.json"));
-                finfoStream.Close();
                 File.WriteAllText(Path.Join(dinfo.FullName, "FileInfo.json"), JsonConvert.SerializeObject(
                     new FInfo() {
                         Name = info.Name,
                         Owner = info.Owner,
                         Description = file.sDescription
                     }));
-                infos.Add(dinfo);
+
+                infos.Add(new(Path.Join(Path.GetTempPath(), "Theatre", dinfo.Name)));
                 
             }
             foreach (var dinfo in infos)
-                result.AddRange(dinfo.EnumerateDirectories()
-                    .Where(x => x.Name == "romfs" || x.Name == "exefs"));
+            {
+                var dirs = dinfo.GetDirectories("*", new EnumerationOptions { RecurseSubdirectories = true });
+                foreach (var dir in dirs)
+                {
+                    if (dir.Name == "romfs" || dir.Name == "exefs")
+                    {
+                        var copypth = Path.Join(moddir.FullName, dinfo.Name, dir.Name);
+                        dir.MoveTo(copypth);
+                        result.Add(new(copypth));
+                    }
+                }
+                dinfo.Delete(true);
+            }
+            return result;
+        }
+
+        public static List<DirectoryInfo> DownloadWiiUMod(this GbModInfo info)
+        {
+            using HttpClient client = new();
+            Stream dl(string url) => client.GetStreamAsync(url).GetAwaiter().GetResult();
+            DirectoryInfo exedir = new FileInfo(Environment.ProcessPath!).Directory!;
+            DirectoryInfo moddir = new(Path.Join(exedir.FullName, "Mods"));
+            moddir.Create();
+            List<DirectoryInfo> infos = new();
+            List<DirectoryInfo> result = new();
+            foreach (var file in info.Files)
+            {
+                FileInfo finfo = new(file.sFile);
+                DirectoryInfo dinfo = new(Path.Join(moddir.FullName,
+                    Path.GetFileNameWithoutExtension(finfo.Name)));
+                dinfo.Create();
+                using var stream = dl(file.sDownloadUrl);
+
+                if (finfo.Extension == ".zip")
+                {
+                    using var reader = new ZipArchive(stream, ZipArchiveMode.Read);
+                    reader.ExtractToDirectory(Path.Join(Path.GetTempPath(), "Theatre", dinfo.Name), true);
+                }
+                else if (finfo.Extension == ".rar")
+                {
+                    using var reader = RarArchive.Open(stream);
+                    reader.WriteToDirectory(Path.Join(Path.GetTempPath(), "Theatre", dinfo.Name), new()
+                    {
+                        ExtractFullPath = true,
+                        Overwrite = true,
+                        PreserveAttributes = true,
+                        PreserveFileTime = true
+                    });
+                }
+                else if (finfo.Extension == ".7z")
+                {
+                    using var reader = SevenZipArchive.Open(stream);
+                    reader.WriteToDirectory(Path.Join(Path.GetTempPath(), "Theatre", dinfo.Name), new()
+                    {
+                        ExtractFullPath = true,
+                        Overwrite = true,
+                        PreserveAttributes = true,
+                        PreserveFileTime = true
+                    });
+                }
+                stream.Close();
+
+                File.WriteAllText(Path.Join(dinfo.FullName, "FileInfo.json"), JsonConvert.SerializeObject(
+                    new FInfo()
+                    {
+                        Name = info.Name,
+                        Owner = info.Owner,
+                        Description = file.sDescription
+                    }));
+
+                infos.Add(new(Path.Join(Path.GetTempPath(), "Theatre", dinfo.Name)));
+            }
+            foreach (var dinfo in infos)
+            {
+                var dirs = dinfo.GetDirectories("*", new EnumerationOptions { RecurseSubdirectories = true });
+                foreach (var dir in dirs)
+                {
+                    if (dir.Name == "content")
+                    {
+                        var copypth = Path.Join(moddir.FullName, dinfo.Name, dir.Name);
+                        dir.MoveTo(copypth);
+                        result.Add(new(copypth));
+                        break;
+                    }
+                }
+                dinfo.Delete(true);
+            }
             return result;
         }
 
